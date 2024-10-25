@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(limiter);
 
 // * Set View engine
 app.set("view engine", "ejs");
@@ -24,6 +25,7 @@ app.get("/", async (req: Request, res: Response) => {
 // * Set Queue
 import "./jobs/index.js";
 import routes from "./routes/routing.js";
+import { limiter } from "./config/rateLimit.js";
 
 app.use("/", routes);
 
