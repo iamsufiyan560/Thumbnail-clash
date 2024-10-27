@@ -1,9 +1,15 @@
 import { Router, Request, Response } from "express";
 import { clashSchema } from "../validations/clashValidation.js";
 import { ZodError } from "zod";
-import { formatError, imageValidator, uploadImage } from "../helper.js";
+import {
+  formatError,
+  imageValidator,
+  removeImage,
+  uploadImage,
+} from "../helper.js";
 import { UploadedFile } from "express-fileupload";
 import prisma from "../config/database.js";
+import authMiddleware from "../middleware/AuthMiddleware.js";
 
 const router = Router();
 
@@ -83,6 +89,44 @@ router.post("/", async (req: Request, res: Response) => {
       },
     });
     res.json({ message: "Clash created successfully!" });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const errors = formatError(error);
+      res.status(422).json({ message: "Invalid data", errors });
+    } else {
+      res
+        .status(500)
+        .json({ error: "Something went wrong.please try again!", data: error });
+    }
+  }
+});
+
+router.put("/:id", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+    const payload = clashSchema.parse(body);
+    if (req.files?.image) {
+      const image: UploadedFile = req.files.image as UploadedFile;
+      const validMsg = imageValidator(image?.size, image?.mimetype);
+      if (validMsg) {
+        res.status(422).json({ errors: { image: validMsg } });
+        return;
+      }
+
+      const clash = await prisma.clash.findUnique({
+        select: { id: true, image: true },
+        where: { id: Number(id) },
+      });
+      if (clash?.image) removeImage(clash?.image);
+      payload.image = uploadImage(image);
+    }
+    await prisma.clash.update({
+      data: payload,
+      where: { id: Number(id) },
+    });
+    res.json({ message: "Clash updated successfully!" });
+    return;
   } catch (error) {
     if (error instanceof ZodError) {
       const errors = formatError(error);
