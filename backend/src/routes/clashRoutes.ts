@@ -139,4 +139,42 @@ router.put("/:id", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/:id", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const clash = await prisma.clash.findUnique({
+      select: { image: true, user_id: true },
+      where: { id: Number(id) },
+    });
+    if (clash?.user_id !== req.user?.id) {
+      res.status(401).json({ message: "Un Authorized" });
+      return;
+    }
+    if (clash?.image) removeImage(clash?.image);
+    const clashItems = await prisma.clashItem.findMany({
+      select: {
+        image: true,
+      },
+      where: {
+        clash_id: Number(id),
+      },
+    });
+
+    if (clashItems.length > 0) {
+      clashItems.forEach((item) => {
+        removeImage(item.image);
+      });
+    }
+
+    await prisma.clash.delete({
+      where: { id: Number(id) },
+    });
+    res.json({ message: "Clash Deleted successfully!" });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+    return;
+  }
+});
+
 export default router;
