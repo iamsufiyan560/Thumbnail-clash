@@ -9,3 +9,5 @@ export const LOGIN_URL = BACKEND_URL + "/api/login";
 export const CHECK_CREDENTIALS_URL = BACKEND_URL + "/api/check/login";
 export const FORGOT_PASSWORD_URL = BACKEND_URL + "/api/forget-password";
 export const RESET_PASSWORD_URL = BACKEND_URL + "/api/reset-password";
+
+export const CLASH_URL = BACKEND_URL + "/api/clash";
