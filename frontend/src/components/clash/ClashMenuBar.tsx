@@ -7,9 +7,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
-import dynamic from "next/dynamic";
+
+const EditClash = dynamic(() => import("./EditClash"));
+
 import Env from "@/lib/env";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
 
 export default function ClashMenuBar({
   clash,
@@ -28,7 +31,16 @@ export default function ClashMenuBar({
 
   return (
     <>
-      <Suspense fallback={<p>Loading....</p>}></Suspense>
+      <Suspense fallback={<p>Loading....</p>}>
+        {editOpen && (
+          <EditClash
+            token={token}
+            open={editOpen}
+            setOpen={setEditOpen}
+            clash={clash}
+          />
+        )}
+      </Suspense>
 
       <DropdownMenu>
         <DropdownMenuTrigger>

@@ -13,7 +13,7 @@ export default async function dashboard() {
   );
 
   return (
-    <div className="container">
+    <div className="container space-y-4  px-4">
       <Navbar />
       <div className="text-end mt-4  ">
         <AddClash user={session?.user!} />
