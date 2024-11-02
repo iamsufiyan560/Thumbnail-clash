@@ -13,6 +13,7 @@ const EditClash = dynamic(() => import("./EditClash"));
 import Env from "@/lib/env";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import DeleteClash from "./DeleteClash";
 
 export default function ClashMenuBar({
   clash,
@@ -31,6 +32,8 @@ export default function ClashMenuBar({
 
   return (
     <>
+      <DeleteClash open={open} setOpen={setOpen} token={token} id={clash.id} />
+
       <Suspense fallback={<p>Loading....</p>}>
         {editOpen && (
           <EditClash
