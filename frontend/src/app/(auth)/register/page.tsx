@@ -2,8 +2,16 @@ import Register from "@/components/auth/Register";
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 export default async function register() {
+  const session = await getServerSession(authOptions);
+  if (session !== null) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       <Link
