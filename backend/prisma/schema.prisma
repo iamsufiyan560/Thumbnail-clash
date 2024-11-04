@@ -19,10 +19,10 @@ model User {
   email_verified_at    DateTime?
   email_verify_token   String?
   created_at           DateTime  @default(now())
-Clash                Clash[]
+  Clash                Clash[]
+
+  @@index([name])
 }
-
-
 
 model Clash {
   id            Int             @id @default(autoincrement())
@@ -55,4 +55,3 @@ model ClashComments {
   comment    String
   created_at DateTime @default(now())
 }
-

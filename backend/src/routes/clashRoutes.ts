@@ -7,7 +7,7 @@ import {
   removeImage,
   uploadImage,
 } from "../helper.js";
-import { UploadedFile } from "express-fileupload";
+import { FileArray, UploadedFile } from "express-fileupload";
 import prisma from "../config/database.js";
 import authMiddleware from "../middleware/AuthMiddleware.js";
 
@@ -177,4 +177,51 @@ router.delete("/:id", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+//
+router.post("/items", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.body;
+    const files: FileArray | null = req.files!;
+    let imgErros: Array<string> = [];
+    const images = files?.["images[]"] as UploadedFile[];
+    if (images.length >= 2) {
+      images.map((img) => {
+        const validMsg = imageValidator(img?.size, img?.mimetype);
+        if (validMsg) {
+          imgErros.push(validMsg);
+        }
+      });
+      if (imgErros.length > 0) {
+        res.status(422).json({ errors: imgErros });
+        return;
+      }
+
+      // * Upload images to items
+      let uploadedImages: string[] = [];
+      images.map((img) => {
+        uploadedImages.push(uploadImage(img));
+      });
+
+      uploadedImages.map(async (item) => {
+        await prisma.clashItem.create({
+          data: {
+            image: item,
+            clash_id: Number(id),
+          },
+        });
+      });
+
+      res.json({ message: "Clash Items updated successfully!" });
+      return;
+    }
+
+    res
+      .status(404)
+      .json({ message: "Please select at least 2 images for clashing." });
+    return;
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong.please try again" });
+    return;
+  }
+});
 export default router;
