@@ -5,6 +5,7 @@ import {
 import { fetchClash } from "@/app/fetch/clashFetch";
 import Navbar from "@/components/base/Navbar";
 import AddClashItems from "@/components/clash/AddClashItemsAddClashItems";
+import ViewClashItems from "@/components/clash/ViewClashItems";
 
 import { getServerSession } from "next-auth";
 import React from "react";
@@ -24,10 +25,14 @@ export default async function clashItems({
         <p className="text-lg">{clash?.description}</p>
       </div>
 
-      <AddClashItems
-        token={session?.user?.token!}
-        clashId={params?.id.toString()}
-      />
+      {clash?.ClashItem && clash.ClashItem.length > 0 ? (
+        <ViewClashItems clash={clash} />
+      ) : (
+        <AddClashItems
+          token={session?.user?.token!}
+          clashId={params?.id.toString()}
+        />
+      )}
     </div>
   );
 }
