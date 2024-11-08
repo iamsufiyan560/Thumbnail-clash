@@ -3,11 +3,24 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
+import { createServer, Server as HttpServer } from "http";
+import { Server } from "socket.io";
 import ExpressFileUpoad from "express-fileupload";
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app: Express = express();
+const server: HttpServer = createServer(app);
+//
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+  },
+});
+
+export { io };
+setupSocket(io);
+//
 
 const PORT = process.env.PORT || 5000;
 
@@ -35,7 +48,8 @@ app.get("/", async (req: Request, res: Response) => {
 import "./jobs/index.js";
 import routes from "./routes/routing.js";
 import { limiter } from "./config/rateLimit.js";
+import { setupSocket } from "./socket.js";
 
 app.use("/", routes);
 
-app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
+server.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));

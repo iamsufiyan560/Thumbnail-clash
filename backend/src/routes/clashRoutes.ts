@@ -13,7 +13,7 @@ import authMiddleware from "../middleware/AuthMiddleware.js";
 
 const router = Router();
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", authMiddleware, async (req: Request, res: Response) => {
   try {
     const clashs = await prisma.clash.findMany({
       where: { user_id: req.user?.id },

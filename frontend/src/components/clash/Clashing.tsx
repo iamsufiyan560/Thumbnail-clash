@@ -5,11 +5,37 @@ import { getImageUrl } from "@/lib/utils";
 import { Button } from "../ui/button";
 
 import { Textarea } from "../ui/textarea";
+import { ThumbsUp } from "lucide-react";
+import CountUp from "react-countup";
+import socket from "@/lib/socket";
 
 export default function Clashing({ clash }: { clash: ClashType }) {
+  const [hideVote, setHideVote] = useState(false);
   const [clashItems, setClashItems] = useState(clash.ClashItem);
   const [clashComments, setClashComments] = useState(clash.ClashComments);
   const [comment, setComment] = useState("");
+
+  const handleVote = (id: number) => {
+    if (clashItems) {
+      setHideVote(true);
+      updateCounter(id);
+      socket.emit(`clashing-${clash.id}`, {
+        clashId: clash.id,
+        clashItemId: id,
+      });
+    }
+  };
+
+  const updateCounter = (id: number) => {
+    if (clashItems) {
+      const items = [...clashItems];
+      const findIndex = clashItems.findIndex((item) => item.id === id);
+      if (findIndex !== -1) {
+        items[findIndex].count += 1;
+      }
+      setClashItems(items);
+    }
+  };
 
   return (
     <div className="mt-10">
@@ -20,7 +46,7 @@ export default function Clashing({ clash }: { clash: ClashType }) {
             return (
               <Fragment key={index}>
                 {/* First Block */}
-                <div className="w-full lg:w-[500px] flex justify-center items-center flex-col">
+                <div className="w-full lg:w-[500px] flex justify-center items-center  flex-col border rounded-md py-2 ">
                   <div className="w-full flex justify-center items-center  p-2 h-[300px]">
                     <Image
                       src={getImageUrl(item.image)}
@@ -30,6 +56,24 @@ export default function Clashing({ clash }: { clash: ClashType }) {
                       className="w-full h-[300px] object-contain rounded-xl"
                     />
                   </div>
+
+                  {hideVote ? (
+                    <CountUp
+                      start={0}
+                      end={item.count}
+                      duration={5}
+                      className="text-5xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                    />
+                  ) : (
+                    <Button
+                      className="mt-4"
+                      onClick={() => {
+                        handleVote(item.id);
+                      }}
+                    >
+                      <span className="mr-2 text-lg">Vote</span> <ThumbsUp />
+                    </Button>
+                  )}
                 </div>
 
                 {/* VS Block */}

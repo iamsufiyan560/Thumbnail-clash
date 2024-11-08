@@ -1,9 +1,12 @@
 "use client";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
+import CountUp from "react-countup";
 
 export default function ViewClashItems({ clash }: { clash: ClashType }) {
+  const [clashComments, setClashComments] = useState(clash.ClashComments);
+
   return (
     <div className="mt-10">
       <div className="flex flex-wrap lg:flex-nowrap justify-between items-center">
@@ -12,7 +15,7 @@ export default function ViewClashItems({ clash }: { clash: ClashType }) {
           clash.ClashItem.map((item, index) => {
             return (
               <Fragment key={index}>
-                <div className="w-full lg:w-[500px] flex justify-center items-center flex-col">
+                <div className="w-full lg:w-[500px] flex justify-center items-center flex-col border rounded-md">
                   <div className="w-full flex justify-center items-center  p-2 h-[300px]">
                     <Image
                       src={getImageUrl(item.image)}
@@ -22,6 +25,12 @@ export default function ViewClashItems({ clash }: { clash: ClashType }) {
                       className="w-full h-[300px] object-contain rounded-xl"
                     />
                   </div>
+                  <CountUp
+                    start={0}
+                    end={item.count}
+                    duration={0.5}
+                    className="text-5xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                  />
                 </div>
 
                 {index % 2 === 0 && (
@@ -34,6 +43,20 @@ export default function ViewClashItems({ clash }: { clash: ClashType }) {
               </Fragment>
             );
           })}
+      </div>
+
+      <div className="mt-4">
+        {clashComments &&
+          clashComments.length > 0 &&
+          clashComments.map((item, index) => (
+            <div
+              className="w-full md:w-[600px] rounded-lg p-4 bg-muted mb-4"
+              key={index}
+            >
+              <p className="font-bold">{item.comment}</p>
+              <p>{new Date(item.created_at).toDateString()}</p>
+            </div>
+          ))}
       </div>
     </div>
   );

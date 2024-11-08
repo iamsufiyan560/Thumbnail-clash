@@ -7,6 +7,6 @@ const router = Router();
 
 router.use("/api", AuthRoutes);
 router.use("/api/clash", ClashRoutes);
-router.use("/", authMiddleware, VerifyRoutes);
+router.use("/", VerifyRoutes);
 
 export default router;
