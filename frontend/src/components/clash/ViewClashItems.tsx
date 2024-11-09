@@ -1,11 +1,40 @@
 "use client";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
+import socket from "@/lib/socket";
 import CountUp from "react-countup";
-
 export default function ViewClashItems({ clash }: { clash: ClashType }) {
+  const [clashItems, setClashItems] = useState(clash.ClashItem);
   const [clashComments, setClashComments] = useState(clash.ClashComments);
+  useEffect(() => {
+    socket.on(`clashing-${clash.id}`, (payload: any) => {
+      updateCounter(payload?.clashItemId);
+    });
+
+    socket.on(`clashing_comment-${clash.id}`, (payload) => {
+      updateComment(payload);
+    });
+  }, []);
+
+  const updateCounter = (id: number) => {
+    if (clashItems) {
+      const items = [...clashItems];
+      const findIndex = clashItems.findIndex((item) => item.id === id);
+      if (findIndex !== -1) {
+        items[findIndex].count += 1;
+      }
+      setClashItems(items);
+    }
+  };
+
+  const updateComment = (payload: any) => {
+    if (clashComments && clashComments.length > 0) {
+      setClashComments([payload, ...clashComments!]);
+    } else {
+      setClashComments([payload]);
+    }
+  };
 
   return (
     <div className="mt-10">
@@ -15,7 +44,7 @@ export default function ViewClashItems({ clash }: { clash: ClashType }) {
           clash.ClashItem.map((item, index) => {
             return (
               <Fragment key={index}>
-                <div className="w-full lg:w-[500px] flex justify-center items-center flex-col border rounded-md">
+                <div className="w-full lg:w-[500px] flex justify-center items-center flex-col">
                   <div className="w-full flex justify-center items-center  p-2 h-[300px]">
                     <Image
                       src={getImageUrl(item.image)}

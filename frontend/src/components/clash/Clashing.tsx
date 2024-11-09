@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -8,6 +8,7 @@ import { Textarea } from "../ui/textarea";
 import { ThumbsUp } from "lucide-react";
 import CountUp from "react-countup";
 import socket from "@/lib/socket";
+import { toast } from "sonner";
 
 export default function Clashing({ clash }: { clash: ClashType }) {
   const [hideVote, setHideVote] = useState(false);
@@ -36,6 +37,40 @@ export default function Clashing({ clash }: { clash: ClashType }) {
       setClashItems(items);
     }
   };
+
+  const updateComment = (payload: any) => {
+    if (clashComments && clashComments.length > 0) {
+      setClashComments([payload, ...clashComments!]);
+    } else {
+      setClashComments([payload]);
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (comment.length > 2) {
+      const payload = {
+        id: clash.id,
+        comment: comment,
+        created_at: new Date().toDateString(),
+      };
+      socket.emit(`clashing_comment-${clash.id}`, payload);
+      updateComment(payload);
+      setComment("");
+    } else {
+      toast.warning("Please type at least 2 words 😊");
+    }
+  };
+
+  useEffect(() => {
+    socket.on(`clashing-${clash.id}`, (payload) => {
+      updateCounter(payload?.clashItemId);
+    });
+
+    socket.on(`clashing_comment-${clash.id}`, (payload) => {
+      updateComment(payload);
+    });
+  }, []);
 
   return (
     <div className="mt-10">
@@ -88,7 +123,7 @@ export default function Clashing({ clash }: { clash: ClashType }) {
             );
           })}
       </div>
-      <form className="mt-4 w-full">
+      <form className="mt-4 w-full" onSubmit={handleSubmit}>
         <Textarea
           placeholder="Type your suggestions 😊"
           value={comment}
